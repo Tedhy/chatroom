@@ -1,5 +1,5 @@
 <h1><%= link_to "Chat Increible", root_path%></h1>
-<ul>
+<ul id="Chat_container">
 <% @messages.each do |message| %>
   <li>
 	<%= message.name %> dijo <%= message.content %>
@@ -9,7 +9,7 @@
 <br />
 <%= link_to 'New Message', new_message_path %>
 
-<%= form_for(@message) do |f| %>
+<%= form_for(Message.new, :remote => true) do |f| %>
     <div class="field">
     <%= f.label :name %><br />
     <%= f.text_field :name %>
@@ -22,3 +22,25 @@
     <%= f.submit %>
   </div>
 <% end %>
+
+<script src="http://js.pusher.com/1.11/pusher.min.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    // Enable pusher logging - don't include this in production
+    Pusher.log = function(message) {
+      if (window.console && window.console.log) window.console.log(message);
+    };
+
+    // Flash fallback logging - don't include this in production
+    WEB_SOCKET_DEBUG = true;
+
+    var pusher = new Pusher('4c7c38fab08d5c5fe72e');
+    var channel = pusher.subscribe('app_chat');
+    channel.bind('message:create', function(data) {
+     var message = "<li id='message_" + data.id  + "'>"
+	 message += data.name+": "+data.content
+	 message += "</li>"
+	 $("Chat_conteiner").append(message);
+	 $("#message_content").val("");
+	 $("#message_content").focus();
+    });
+  </script>
